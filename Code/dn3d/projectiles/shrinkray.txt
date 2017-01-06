@@ -1,0 +1,296 @@
+const SHRINK_RATIO = 0.25;
+
+// it's possible to check if actor is shrunk, by checking this item in inventory.
+// shrunk actors can't do things. can't attack, for example.
+class Shrunk : Inventory {}
+
+class ShrinkTrail : Actor
+{
+	int timer;
+	
+	override void Tick()
+	{
+		//Super.Tick();
+		timer++;
+		if (timer > 6) Destroy();
+	}
+
+	Default
+	{
+		+NOGRAVITY;
+		+NOINTERACTION;
+	}
+}
+
+class ShrinkThinker : Actor
+{
+	enum ShrinkState
+	{
+		SS_NotShrunk,
+		SS_Shrinking,
+		SS_Shrunk,
+		SS_Expanding
+	}
+	
+	// shrinks to 0.25.
+	double baseScaleX;
+	double baseScaleY;
+	double baseSpeed;
+	double baseRadius;
+	double baseHeight;
+	int baseHealth;
+	bool basePlayer;
+	// 
+	double baseViewHeight;
+	double baseViewBob;
+	double baseJumpZ;
+	double baseAttackZ;
+	//
+	double shfactor;
+	ShrinkState shstate;
+	bool juststarted;
+	int shrunktime;
+	
+	override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		shfactor = 1.0;
+		shstate = SS_NotShrunk;
+		juststarted = true;
+	}
+	
+	void ApplyShrinkFrame(bool dotrail)
+	{
+		// spawn shrink trail at current size.
+		// don't spawn shrink trail for players. this doesn't look well in first person.
+		if (dotrail && !basePlayer && level.time%2 == 0)
+		{
+			ShrinkTrail st = ShrinkTrail(Spawn("ShrinkTrail", (target.pos)));
+			st.sprite = target.sprite;
+			st.frame = target.frame;
+			st.A_SetScale(target.scale.x, target.scale.y);
+			st.angle = target.angle;
+			st.pitch = target.pitch;
+			st.roll = target.roll;
+		}
+	
+		if (basePlayer)
+		{
+			PlayerPawn pptarget = PlayerPawn(target);
+			pptarget.ViewHeight = pptarget.player.ViewHeight = baseViewHeight*shfactor;
+			pptarget.ViewBob = baseViewBob*shfactor;
+			pptarget.JumpZ = baseJumpZ*(shfactor*4);
+			pptarget.AttackZOffset = baseAttackZ*shfactor;
+		}
+		
+		target.A_SetScale(baseScaleX*shfactor, baseScaleY*shfactor);
+		if (!target.A_SetSize(baseRadius*shfactor, baseHeight*shfactor, true)) // weird
+			target.DamageMobj(null, null, 10000000, 'Crush');
+		if (target) target.speed = baseSpeed*shfactor;
+	}
+
+	override void Tick()
+	{
+		//Super.Tick();
+		if (!target && juststarted) return;
+		else if (!target)
+		{
+			Destroy();
+			return;
+		}
+		
+		switch (shstate)
+		{
+		case SS_NotShrunk:
+			if (juststarted)
+			{
+				juststarted = false;
+				shstate = SS_Shrinking;
+				baseScaleX = target.scale.x;
+				baseScaleY = target.scale.y;
+				baseSpeed = target.speed;
+				baseRadius = target.radius;
+				baseHeight = target.height;
+				baseHealth = target.health;
+				PlayerPawn pptarget = PlayerPawn(target);
+				basePlayer = !!pptarget;
+				if (basePlayer)
+				{
+					baseViewHeight = pptarget.player.ViewHeight;
+					baseViewBob = pptarget.ViewBob;
+					baseJumpZ = pptarget.JumpZ;
+					baseAttackZ = pptarget.AttackZOffset;
+				}
+				//
+				target.GiveInventoryType("Shrunk");
+				target.Deactivate(null);
+				if (!basePlayer) target.bNoClip = true;
+				target.A_PlaySound("sfx/shrinker", CHAN_AUTO);
+				break;
+			}
+			
+			Cleanup();
+			return;
+		
+		case SS_Shrinking:
+			if (shfactor > SHRINK_RATIO) shfactor -= 0.02;
+			else
+			{
+				shfactor = SHRINK_RATIO;
+				shstate = SS_Shrunk;
+				shrunktime = 0;
+				target.bNoClip = false;
+				target.Activate(null);
+				target.SetState(target.ResolveState("See"));
+				target.health = 1;
+				break;
+			}
+			
+			ApplyShrinkFrame(true);
+			break;
+			
+		case SS_Shrunk:
+			if (target.health <= 0 || target.bCorpse) // if enemy died while shrunk, leave it as is.
+			{
+				Destroy();
+				return;
+			}
+
+			ApplyShrinkFrame(false);
+
+			shrunktime++;
+			if (shrunktime > 35*5)
+			{
+				shstate = SS_Expanding;
+				if (!basePlayer) target.bNoClip = true;
+				target.Deactivate(null);
+				target.A_PlaySound("sfx/shrinker", CHAN_AUTO);
+			}
+			break;
+			
+		case SS_Expanding:
+			if (shfactor < 1.0) shfactor += 0.02;
+			else
+			{
+				shfactor = 1.0;
+				shstate = SS_NotShrunk;
+				target.Activate(null);
+				target.bNoClip = false;
+				
+				/* partial cleanup */
+				target.A_SetScale(baseScaleX, baseScaleY);
+				target.A_SetSize(baseRadius, baseHeight, false); // this is if it didn't die.
+				target.speed = baseSpeed;
+				target.health = baseHealth;
+				if (basePlayer)
+				{
+					PlayerPawn pptarget = PlayerPawn(target);
+					pptarget.ViewHeight = pptarget.player.ViewHeight = baseViewHeight;
+					pptarget.ViewBob = baseViewBob;
+					pptarget.JumpZ = baseJumpZ;
+					pptarget.AttackZOffset = baseAttackZ;
+				}
+				
+				break;
+			}
+			
+			ApplyShrinkFrame(true);
+			break;
+			
+		default:
+			break;
+		}
+	}
+	
+	void Cleanup()
+	{
+		if (target) // target might be dead due to expansion failure.
+		{
+			Inventory si = target.FindInventory("Shrunk");
+			if (si)
+			{
+				target.RemoveInventory(si);
+				si.Destroy();
+			}
+		}
+		
+		Destroy();
+	}
+	
+	Default
+	{
+		+NOINTERACTION;
+		+NOSECTOR;
+	}
+}
+
+class ShrinkRay : Actor
+{
+	void A_MyMissile()
+	{
+		// check 'intersection' with shootable actors
+		BlockThingsIterator bit = BlockThingsIterator.Create(self);
+		while (bit.Next())
+		{
+			Actor mo = bit.thing;
+			if (mo == self.target) continue;
+			if (!mo.bSolid && !mo.bShootable) continue;
+			if (mo.health <= 0) continue;
+			
+			vector3 pdiff = mo.pos-pos;
+			if (abs(pdiff.x) > radius+mo.radius || abs(pdiff.y) > radius+mo.radius)
+				continue;
+				
+			if (mo.pos.z+mo.height < pos.z ||
+			    mo.pos.z > pos.z+height) continue;
+			
+			if (mo.bShootable)
+			{
+				vel = (0,0,0);
+				SetState(ResolveState("Death"));
+				// check if already shrunk.
+				if (mo.FindInventory("Shrunk")) continue;
+				// bosses cannot be shrinked.
+				if (mo.bBoss) continue;
+				// check if actor can be shrinked.
+				int ndmg = mo.ApplyDamageFactor('ShrinkRay', 100);
+				if (!ndmg) continue; // can't damage
+				// shrink the actor!
+				ShrinkThinker st = ShrinkThinker(Spawn("ShrinkThinker", mo.pos));
+				st.target = mo;
+			}
+			
+			return;
+		}
+	}
+	
+	override bool CanCollideWith(Actor other, bool passive)
+	{
+		return false; // manual collision detection.
+	}
+	
+	Default
+	{
+		Projectile;
+		
+		Radius 8;
+		Height 16;
+		Speed 16;
+		
+		Scale 0.75;
+		
+		RenderStyle "Add";
+		
+		SeeSound "weapon/shrinker";
+	}
+	
+	States
+	{
+	Spawn:
+		SHRY AABBCCDD 1 BRIGHT A_MyMissile;
+		loop;
+	Death:
+		SHRY EFGH 4 BRIGHT;
+		stop;
+	}
+}

@@ -1,0 +1,22 @@
+class DukeMonster : Actor
+{
+	void A_ThrowGibs(class<DNGibs> cls = "DNGibs", bool down = false)
+	{
+		for (int i = 0; i < 8; i++)
+		{
+			//
+			Actor gibs = Spawn(cls, pos);
+			gibs.vel = (frandom(-16,16), frandom(-16,16), frandom(0,down?-1:16));
+		}
+	}
+	
+	bool CheckShrunk()
+	{
+		return (!!FindInventory("Shrunk"));
+	}
+	
+	Default
+	{
+		+NOINFIGHTING;
+	}
+}

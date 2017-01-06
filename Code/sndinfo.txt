@@ -1,0 +1,25 @@
+octa/roam OCTARM
+octa/see OCTARG
+octa/missile OCTAAT1
+octa/melee OCTAAT2
+octa/pain OCTAPN
+octa/death OCTADY
+
+slimer/hatch SLHTCH01
+slimer/roam SLIROA02
+slimer/see SLIREC06
+slimer/melee SLIMAT
+slimer/death SLIDIE03
+
+alien/roam BLROAM2A
+alien/see BLREC4B
+alien/melee BLRIP1A
+alien/miss BLRIP1B
+alien/pain BLPAIN1B
+alien/death BLDIE3A
+alien/missile BLSPIT1A
+
+weapon/shrinker SHRINKER
+
+sfx/shrinker SHRINK
+sfx/expander ENLARGE

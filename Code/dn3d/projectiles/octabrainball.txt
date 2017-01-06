@@ -1,0 +1,76 @@
+class OctabrainBall : Actor
+{
+	int lastDamage;
+	
+	override void PostBeginPlay()
+	{
+		lastDamage = 0;
+	}
+
+	override void Tick()
+	{
+		bMissile = false;
+		Super.Tick();
+		bMissile = true;
+
+		if (level.time-lastDamage < 3) return;
+		
+		// check 'intersection' with shootable actors
+		BlockThingsIterator bit = BlockThingsIterator.Create(self);
+		while (bit.Next())
+		{
+			Actor mo = bit.thing;
+			if (mo == self.target) continue;
+			if (!mo.bSolid && !mo.bShootable) continue;
+			if (mo.health <= 0) continue;
+			
+			vector3 pdiff = mo.pos-pos;
+			if (abs(pdiff.x) > radius+mo.radius || abs(pdiff.y) > radius+mo.radius)
+				continue;
+				
+			if (mo.pos.z+mo.height < pos.z ||
+			    mo.pos.z > pos.z+height) continue;
+			
+			if (mo.bShootable)
+			{
+				// damage the actor.
+				mo.DamageMobj(self, self.target, random(25, 50), 'OctaAt');
+				// push the actor.
+				mo.vel += vel / (float(mo.Mass)/50);
+				// set player's blend to blue. in addition to normal red tint, this should create pink blend.
+				if (PlayerPawn(mo))
+					mo.A_SetBlend("7f 00 7f", 0.75, 35);
+				lastDamage = level.time;
+			}
+			
+			vel /= 2 * (float(mo.Mass)/25);
+			
+			return;
+		}
+	}
+	
+	Default
+	{
+		+MISSILE;
+		+NOGRAVITY;
+		+SLIDESONWALLS;
+		+NOBLOCKMAP;
+		
+		Radius 16;
+		Height 32;
+		Speed 12;
+		
+		Scale 0.75;
+		
+		RenderStyle "Add";
+		
+		//SeeSound "octa/missile";
+	}
+	
+	States
+	{
+	Spawn:
+		OCTB ABCDEFGHIJKLMNOPQRST 2 BRIGHT A_SetTics((frame%2==0)?2:1);
+		stop;
+	}
+}

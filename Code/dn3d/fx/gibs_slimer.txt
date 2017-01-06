@@ -1,0 +1,31 @@
+class DNGreenGibs : DNGibs
+{
+	Default
+	{
+		Translation "0:255=%[0.7,0.8,0.4]:[0,0,0]";
+		Scale 0.5;
+	}
+	
+	States
+	{
+	Spawn1:
+		DGI1 ABCD 2;
+		loop;
+		
+	Spawn2:
+		DGI2 ABCD 2;
+		loop;
+	
+	Spawn3:
+		DGI3 ABCD 2;
+		loop;
+		
+	Spawn4:
+		DGI4 ABCD 2;
+		loop;
+		
+	Spawn5:
+		DGI5 ABCD 2;
+		loop;
+	}
+}

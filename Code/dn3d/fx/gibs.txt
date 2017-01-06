@@ -1,0 +1,44 @@
+class DNGibs : Actor
+{
+	int deathTimer;
+	
+	override void Tick()
+	{
+		Super.Tick();
+		if (deathTimer++ > 20 || ceilingz==pos.z || floorz==pos.z)
+			Destroy();
+	}
+
+	Default
+	{
+		+NOCLIP;
+	}
+
+	States
+	{
+	Spawn:
+		TNT1 A 0;
+		TNT1 A 0 A_Jump(256, "Spawn1", "Spawn2", "Spawn3", "Spawn4", "Spawn5");
+		stop;
+		
+	Spawn1:
+		DGI1 ABCD 2;
+		loop;
+		
+	Spawn2:
+		DGI2 ABCD 2;
+		loop;
+	
+	Spawn3:
+		DGI3 ABCD 2;
+		loop;
+		
+	Spawn4:
+		DGI4 ABCD 2;
+		loop;
+		
+	Spawn5:
+		DGI5 ABCD 2;
+		loop;
+	}
+}

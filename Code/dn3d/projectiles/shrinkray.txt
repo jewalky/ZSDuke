@@ -90,7 +90,7 @@ class ShrinkThinker : Actor
         target.A_SetScale(baseScaleX, baseScaleY);
         target.A_SetSize(baseRadius, baseHeight, false); // this is if it didn't die.
         target.speed = baseSpeed;
-        target.health = baseHealth;
+        target.A_SetHealth(baseHealth);
         
         if (basePlayer)
         {
@@ -178,7 +178,7 @@ class ShrinkThinker : Actor
                 target.bNoClip = false;
                 target.Activate(null);
                 target.SetState(target.ResolveState("See"));
-                target.health = 1;
+                target.A_SetHealth(1);
                 break;
             }
             

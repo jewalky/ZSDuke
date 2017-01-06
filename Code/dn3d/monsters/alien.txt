@@ -40,7 +40,38 @@ class Alien : DukeMonster
             frame = oldLeap+2;
         }
     }
+    
+    double GetJumpDistance()
+    {
+        double dst = 480;
+        if (ceilingz-pos.z > 128) dst *= 2;
+        return dst;
+    }
 
+    bool CheckPitBeforeTarget()
+    {
+        if (!CheckSight(target)) return false;
+        
+        int step = int(radius/2);
+        vector3 checkdirection = (target.pos-pos).Unit()*step;
+        int steps = min(Distance2D(target), GetJumpDistance())/step;
+        double curz = pos.z;
+        SetXYZ((pos.x, pos.y, pos.z+64));
+        for (int i = 0; i < steps; i++)
+        {
+            double zat = GetZAt(pos.x+checkdirection.x*i, pos.y+checkdirection.y*i, 0, GZF_ABSOLUTEPOS|GZF_ABSOLUTEANG);
+            //A_LogFloat(zat);
+            if (curz-zat > MaxStepHeight*2 || zat-curz > MaxStepHeight)
+            {
+                SetXYZ((pos.x, pos.y, curz));
+                return true;
+            }
+        }
+        
+        SetXYZ((pos.x, pos.y, curz));
+        return false;
+    }
+    
     void A_MyChase()
     {
         // check jump
@@ -49,9 +80,10 @@ class Alien : DukeMonster
         if (!target) return;
         //
         if (pos.z == floorz && // if we are standing
-            (abs(target.pos.z-pos.z) > Default.MaxStepHeight) && // and target has more height difference than maxstepheight
             !random(0, 16) && // and we don't do this all the time
-            Distance2D(target) < 480) // and target is within max jump radius
+            ((abs(target.pos.z-pos.z) > Default.MaxStepHeight) || // and target has more height difference than maxstepheight
+             CheckPitBeforeTarget()) && // and there's a deep pit in front of us
+            Distance2D(target) < GetJumpDistance()) // and target is within max jump radius
         {
             oldLeap = 0;
             SetState(ResolveState("Leap"));

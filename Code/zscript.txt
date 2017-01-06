@@ -2,12 +2,16 @@
 
 #include "dn3d/fx/gibs.txt"
 #include "dn3d/fx/gibs_slimer.txt"
+#include "dn3d/fx/gibs_trooper.txt"
+#include "dn3d/fx/transporter.txt"
 
 #include "dn3d/projectiles/octabrainball.txt"
 #include "dn3d/projectiles/shrinkray.txt"
+#include "dn3d/projectiles/troopershot.txt"
 
 #include "dn3d/monsters/octabrain.txt"
 #include "dn3d/monsters/slimer.txt"
 #include "dn3d/monsters/egg.txt"
 #include "dn3d/monsters/alien.txt"
 #include "dn3d/monsters/trooper.txt"
+#include "dn3d/monsters/captain.txt"

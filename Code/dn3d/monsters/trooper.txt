@@ -1,42 +1,111 @@
-class AlienTrooper : DukeMonster
+class AssaultTrooper : DukeMonster
 {
+    int lastFlyTimer;
+    bool doStopFlying;
+    
+    override void PostBeginPlay()
+    {
+        Super.PostBeginPlay();
+        lastFlyTimer = 0;
+        doStopFlying = false;
+    }
+    
+    virtual void A_TrooperChase()
+    {
+        // randomly go flying or grounded.
+        if (!doStopFlying && level.time-lastFlyTimer > 5*35 && !random(0,32))
+        {
+            if (bNoGravity)
+            {
+                doStopFlying = true;
+                A_UnsetFloat();
+            }
+            else
+            {
+                lastFlyTimer = level.time;
+                bNoGravity = true;
+                A_SetFloat();
+                SetState(ResolveState("Fly"));
+                vel += (0, 0, 4);
+            }
+        }
+        
+        if (doStopFlying)
+        {
+            if (abs(pos.z-floorz) < MaxStepHeight)
+            {
+                bNoGravity = false;
+                lastFlyTimer = level.time;
+                doStopFlying = false;
+                SetState(ResolveState("See"));
+            }
+            else
+            {
+                SetOrigin(pos+(0, 0, -1)*speed, true);
+                return;
+            }
+        }
+        
+        if (bNoGravity)
+        {
+            A_Chase(null, "FlyMissile");
+        }
+        else
+        {
+            A_Chase(null, "Missile");
+        }
+    }
+
 	Default
 	{
 		Monster;
 		Radius 24;
 		Height 64;
-		Health 100;
+		Health 30;
 		Mass 100;
 		PainChance 64;
 		Speed 6;
 		
 		Scale 0.7;
 		
-		Obituary "%o got shot by a Predator Trooper.";
+		Obituary "%o got shot by an Assault Trooper.";
 		
-		/*SeeSound "alien/see";
-		PainSound "alien/pain";
-		DeathSound "alien/death";
-		ActiveSound "alien/roam";*/
+		SeeSound "trooper/see";
+		PainSound "trooper/pain";
+		DeathSound "trooper/death";
+		ActiveSound "trooper/roam";
 		
-		Translation "112:127=[255,255,0]:[0,0,0]";
+		Translation "112:127=[255,255,0]:[32,32,0]"; // yellowish (assault trooper)
+        //Translation "112:127=[255,0,0]:[32,0,0]"; // red (captain)
+        //Translation "112:127=[128,192,255]:[8,16,32]"; // normal/original (blueish)
 	}
 
 	States
 	{
 	Spawn:
+        TNT1 A 0 A_JumpIf(bNoGravity, "SpawnFly");
 		LIZT AAAABBBB 8 A_Look;
 		loop;
+        
+    SpawnFly:
+        LIZT G 8 A_Look;
+        goto Spawn;
 		
 	See:
-		LIZT AAAABBBBCCCCDDDD 1 A_Chase;
+		LIZT AAAABBBBCCCCDDDD 1 A_TrooperChase;
 		loop;
 		
 	Missile:
-		LIZT E 4 { A_FaceTarget(); A_PlaySound("", CHAN_AUTO); }
-		LIZT F 4 BRIGHT { A_FaceTarget(); A_SpawnProjectile("ShrinkRay"); }
+		LIZT E 4 { A_FaceTarget(); A_PlaySound("weapon/laser", CHAN_AUTO); }
+		LIZT F 4 BRIGHT { A_FaceTarget(); A_SpawnProjectile("TrooperShot"); }
 		LIZT E 2;
 		goto See;
+        
+    FlyMissile:
+		LIZT G 4 { A_FaceTarget(); A_PlaySound("weapon/laser", CHAN_AUTO); }
+		LIZT H 4 BRIGHT { A_FaceTarget(); A_SpawnProjectile("TrooperShot"); }
+		LIZT G 2;
+        goto Fly;
 	
 	Pain:
 		LIZT I 8 A_Pain;
@@ -50,7 +119,12 @@ class AlienTrooper : DukeMonster
 		stop;
 		
 	XDeath:
-		TNT1 A 0 A_ThrowGibs;
+		TNT1 A 0 A_ThrowGibs("DNTrooperGibs");
 		stop;
-	}
+        
+    Fly:
+        LIZT G 1;
+        TNT1 A 0 A_TrooperChase;
+        loop;
+    }
 }

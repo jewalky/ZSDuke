@@ -18,7 +18,7 @@ class Alien : DukeMonster
 			{
 				A_FaceTarget();
 				double vertical = 12;
-				if (target.z-pos.z > 64 && ceilingz-pos.z > 128) vertical = 18;
+				if (target.pos.z-pos.z > 64 && ceilingz-pos.z > 128) vertical = 18;
 				vector3 newdir = (cos(angle)*12, sin(angle)*12, vertical);
 				vel += newdir;
 				oldLeap = frame;

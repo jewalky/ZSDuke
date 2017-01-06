@@ -1,0 +1,151 @@
+class AssaultCaptain : AssaultTrooper
+{
+    bool fakeDeath;
+    bool fakeDeathDone;
+    bool inTeleport;
+
+    override void PostBeginPlay()
+    {
+        Super.PostBeginPlay();
+        fakeDeath = false;
+        inTeleport = false;
+    }
+    
+    bool CheckBehindTarget()
+    {
+        double angmod = target.angle;
+        double angdiff = target.AngleTo(self, false)-angmod;
+        while (angdiff < 0) angdiff += 360;
+        while (angdiff > 360) angdiff -= 360;
+        if (angdiff > 180) angdiff -= 360;
+        
+        // so if angdiff is >110 (widescreen), player is not looking at us!
+        return (abs(angdiff) > 110);
+    }
+    
+    void A_FakeDeath()
+    {
+        // check for target looking the other way. if so, "revive" and attack.
+        // 
+        bNoclip = true;
+        bShootable = false;
+        
+        // check if target looks away.
+        if (!target) // die properly.
+        {
+            A_Die();
+            return;
+        }
+        
+        if (CheckBehindTarget() && !random(0, 8))
+        {
+            // revive when not looked at
+            fakeDeath = false;
+            bNoClip = false;
+            bShootable = true;
+            SetState(ResolveState("See"));
+        }
+    }
+    
+    void A_TryFakeDeath()
+    {
+        if (!fakeDeathDone && !random(0, 2))
+        {
+            fakeDeath = true;
+            fakeDeathDone = true;
+            // also fall out of flying state.
+            A_UnsetFloat();
+            bNoGravity = false;
+            SetState(ResolveState("FakeDeath"));
+            return;
+        }
+    }
+    
+    override bool CanCollideWith(Actor actor, bool passive)
+    {
+        if (fakeDeath || inTeleport) return false;
+        return Super.CanCollideWith(actor, passive);
+    }
+    
+    override void A_TrooperChase()
+    {
+        if (!random(0, 64) && !CheckBehindTarget())
+        {
+            // check if can teleport right behind.
+            // this is temporary:
+            SetState(ResolveState("TeleportOut"));
+            return;
+        }
+        
+        Super.A_TrooperChase();
+    }
+    
+    void A_CaptainTeleport()
+    {
+        // random delay before appearing.
+        if (!random(0, 64))
+        {
+            vector3 targetLocation = target.Vec3Angle(target.radius+radius+32, target.Angle+180, target.pos.z);
+            double oldz = pos.z;
+            SetXYZ((pos.x, pos.y, target.pos.z));
+            if (!CheckPosition((targetLocation.x, targetLocation.y), false))
+            {
+                SetXYZ((pos.x, pos.y, oldz));
+            }
+            else
+            {
+                TeleportMove(targetLocation, true, true);
+                A_SetRenderStyle(1, STYLE_Normal);
+                bNoClip = false;
+                bShootable = true;
+                inTeleport = false;
+                SetState(ResolveState("TeleportIn"));
+            }
+            return;
+        }
+        
+        // invisible!
+        A_SetRenderStyle(1, STYLE_None);
+        bNoClip = true;
+        bShootable = false;
+        inTeleport = true;
+    }
+
+	Default
+	{
+        Health 60;
+    
+		//Translation "112:127=[255,255,0]:[32,32,0]"; // yellowish (assault trooper)
+        Translation "112:127=[255,0,0]:[32,0,0]"; // red (captain)
+        //Translation "112:127=[128,192,255]:[8,16,32]"; // normal/original (blueish)
+	}
+    
+    States
+    {
+    Pain:
+        TNT1 A 0 A_TryFakeDeath;
+        goto Super::Pain;
+    FakeDeath:
+        TNT1 A 0 A_PlaySound("captain/choke", CHAN_AUTO);
+        LIZT OPOPOPOP 10;
+        LIZT N 8;
+    FakeDeathLoop:
+        LIZT M 1 A_FakeDeath;
+        loop;
+    TeleportOut:
+        LIZT T 8;
+        LIZT U 8 BRIGHT A_SpawnItemEx("TransportFog", 0, 0, 32);
+        LIZT U 3 BRIGHT A_SetScale(0.6, 0.7);
+        LIZT U 3 BRIGHT A_SetScale(0.4, 0.7);
+        LIZT U 3 BRIGHT A_SetScale(0.2, 0.7);
+    TeleportLoop:
+        TNT1 A 1 A_CaptainTeleport;
+        loop;
+    TeleportIn:
+        LIZT U 1 BRIGHT A_SetScale(0.2, 0.7);
+        LIZT U 1 BRIGHT A_SetScale(0.4, 0.7);
+        LIZT U 1 BRIGHT A_SetScale(0.6, 0.7);
+        LIZT U 1 BRIGHT A_SetScale(0.7, 0.7);
+        goto Super::See;
+    }
+}

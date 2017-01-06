@@ -19,6 +19,16 @@ alien/pain BLPAIN1B
 alien/death BLDIE3A
 alien/missile BLSPIT1A
 
+trooper/roam1 ROAM06
+trooper/roam2 ROAM58
+$random trooper/roam { trooper/roam1 trooper/roam2 }
+trooper/see PREDRG
+trooper/pain PREDPN
+trooper/death PREDDY
+
+captain/choke CHOKN12
+
+weapon/laser GBLASR01
 weapon/shrinker SHRINKER
 
 sfx/shrinker SHRINK

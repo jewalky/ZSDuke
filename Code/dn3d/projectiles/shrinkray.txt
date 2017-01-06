@@ -45,6 +45,9 @@ class ShrinkThinker : Actor
 	double baseViewBob;
 	double baseJumpZ;
 	double baseAttackZ;
+    double baseCrouchFactor;
+    double baseCrouchOffset;
+    double baseCrouchViewDelta;
 	//
 	double shfactor;
 	ShrinkState shstate;
@@ -59,6 +62,49 @@ class ShrinkThinker : Actor
 		juststarted = true;
 	}
 	
+    void SaveState()
+    {
+        baseScaleX = target.scale.x;
+        baseScaleY = target.scale.y;
+        baseSpeed = target.speed;
+        baseRadius = target.radius;
+        baseHeight = target.height;
+        baseHealth = target.health;
+        
+        PlayerPawn pptarget = PlayerPawn(target);
+        basePlayer = !!pptarget;
+        if (basePlayer)
+        {
+            baseViewHeight = pptarget.player.ViewHeight;
+            baseViewBob = pptarget.ViewBob;
+            baseJumpZ = pptarget.JumpZ;
+            baseAttackZ = pptarget.AttackZOffset;
+            baseCrouchFactor = pptarget.player.crouchfactor;
+            baseCrouchOffset = pptarget.player.crouchoffset;
+            baseCrouchViewDelta = pptarget.player.crouchviewdelta;
+        }
+    }
+    
+    void RestoreState()
+    {
+        target.A_SetScale(baseScaleX, baseScaleY);
+        target.A_SetSize(baseRadius, baseHeight, false); // this is if it didn't die.
+        target.speed = baseSpeed;
+        target.health = baseHealth;
+        
+        if (basePlayer)
+        {
+            PlayerPawn pptarget = PlayerPawn(target);
+            pptarget.ViewHeight = pptarget.player.ViewHeight = baseViewHeight;
+            pptarget.ViewBob = baseViewBob;
+            pptarget.JumpZ = baseJumpZ;
+            pptarget.AttackZOffset = baseAttackZ;
+            pptarget.player.crouchfactor = baseCrouchFactor;
+            pptarget.player.crouchoffset = baseCrouchOffset;
+            pptarget.player.crouchviewdelta = baseCrouchViewDelta;
+        }
+    }
+    
 	void ApplyShrinkFrame(bool dotrail)
 	{
 		// spawn shrink trail at current size.
@@ -79,8 +125,11 @@ class ShrinkThinker : Actor
 			PlayerPawn pptarget = PlayerPawn(target);
 			pptarget.ViewHeight = pptarget.player.ViewHeight = baseViewHeight*shfactor;
 			pptarget.ViewBob = baseViewBob*shfactor;
-			pptarget.JumpZ = baseJumpZ*(shfactor*4);
+			pptarget.JumpZ = min(baseJumpZ*(shfactor*4), baseJumpZ);
 			pptarget.AttackZOffset = baseAttackZ*shfactor;
+            pptarget.player.crouchfactor = baseCrouchFactor*shfactor;
+            pptarget.player.crouchoffset = baseCrouchOffset*shfactor;
+            pptarget.player.crouchviewdelta = baseCrouchViewDelta*shfactor;
 		}
 		
 		target.A_SetScale(baseScaleX*shfactor, baseScaleY*shfactor);
@@ -106,21 +155,7 @@ class ShrinkThinker : Actor
 			{
 				juststarted = false;
 				shstate = SS_Shrinking;
-				baseScaleX = target.scale.x;
-				baseScaleY = target.scale.y;
-				baseSpeed = target.speed;
-				baseRadius = target.radius;
-				baseHeight = target.height;
-				baseHealth = target.health;
-				PlayerPawn pptarget = PlayerPawn(target);
-				basePlayer = !!pptarget;
-				if (basePlayer)
-				{
-					baseViewHeight = pptarget.player.ViewHeight;
-					baseViewBob = pptarget.ViewBob;
-					baseJumpZ = pptarget.JumpZ;
-					baseAttackZ = pptarget.AttackZOffset;
-				}
+				SaveState();
 				//
 				target.GiveInventoryType("Shrunk");
 				target.Deactivate(null);
@@ -176,21 +211,7 @@ class ShrinkThinker : Actor
 				shstate = SS_NotShrunk;
 				target.Activate(null);
 				target.bNoClip = false;
-				
-				/* partial cleanup */
-				target.A_SetScale(baseScaleX, baseScaleY);
-				target.A_SetSize(baseRadius, baseHeight, false); // this is if it didn't die.
-				target.speed = baseSpeed;
-				target.health = baseHealth;
-				if (basePlayer)
-				{
-					PlayerPawn pptarget = PlayerPawn(target);
-					pptarget.ViewHeight = pptarget.player.ViewHeight = baseViewHeight;
-					pptarget.ViewBob = baseViewBob;
-					pptarget.JumpZ = baseJumpZ;
-					pptarget.AttackZOffset = baseAttackZ;
-				}
-				
+                RestoreState();
 				break;
 			}
 			

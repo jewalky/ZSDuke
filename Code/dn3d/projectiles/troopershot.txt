@@ -1,0 +1,77 @@
+class TrooperShotTrail : Actor
+{
+    Default
+    {
+        +NOINTERACTION;
+        
+        Scale 0.75;
+        
+        RenderStyle "Add";
+    }
+
+    States
+    {
+    Spawn:
+        LASR A -1 BRIGHT;
+        stop;
+    }
+}
+
+class TrooperShot : Actor
+{
+    TrooperShotTrail trail1;
+    TrooperShotTrail trail2;
+
+    override void PostBeginPlay()
+    {
+        Super.PostBeginPlay();
+        
+        trail1 = TrooperShotTrail(Spawn("TrooperShotTrail", pos));
+        trail1.master = self;
+        trail2 = TrooperShotTrail(Spawn("TrooperShotTrail", pos));
+        trail2.master = self;
+        
+        // random damage. not supported in zscript via Damage property.
+        //SetDamage(random(8, 20));
+    }
+
+	override void Tick()
+	{
+        vector3 unitvel = vel.Unit();
+    
+        Super.Tick();
+        
+        if (trail1 && trail2)
+        {
+            trail1.A_Warp(AAPTR_MASTER, -unitvel.x*8, -unitvel.y*8, -unitvel.z*8, 0, WARPF_ABSOLUTEOFFSET|WARPF_WARPINTERPOLATION);
+            trail2.A_Warp(AAPTR_MASTER, -unitvel.x*16, -unitvel.y*16, -unitvel.z*16, 0, WARPF_ABSOLUTEOFFSET|WARPF_WARPINTERPOLATION);
+        }
+	}
+	
+	Default
+	{
+        Projectile;
+		
+		Radius 8;
+		Height 16;
+		Speed 24;
+        Damage 4;
+		
+		Scale 0.75;
+        
+		RenderStyle "Add";
+		
+		//SeeSound "octa/missile";
+	}
+	
+	States
+	{
+	Spawn:
+		LASR A 4 BRIGHT;
+		loop;
+        
+    Death:
+        TNT1 A 0 { trail1.Destroy(); trail2.Destroy(); }
+        stop;
+	}
+}

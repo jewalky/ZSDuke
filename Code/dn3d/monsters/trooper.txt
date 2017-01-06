@@ -46,7 +46,11 @@ class AssaultTrooper : DukeMonster
             }
         }
         
-        if (bNoGravity)
+        if (CheckShrunk())
+        {
+            A_Chase(null, null); // don't attack
+        }
+        else if (bNoGravity)
         {
             A_Chase(null, "FlyMissile");
         }
@@ -54,6 +58,12 @@ class AssaultTrooper : DukeMonster
         {
             A_Chase(null, "Missile");
         }
+    }
+    
+    override void Deactivate(Actor activator)
+    {
+        if (!CheckShrunk()) A_SetScale(0.7, 0.7);
+        Super.Deactivate(activator);
     }
 
 	Default
@@ -92,6 +102,7 @@ class AssaultTrooper : DukeMonster
         goto Spawn;
 		
 	See:
+        TNT1 A 0 A_JumpIf(bNoGravity, "Fly");
 		LIZT AAAABBBBCCCCDDDD 1 A_TrooperChase;
 		loop;
 		

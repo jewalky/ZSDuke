@@ -43,13 +43,14 @@ class AssaultCaptain : AssaultTrooper
             fakeDeath = false;
             bNoClip = false;
             bShootable = true;
+            A_PlaySound("trooper/see", CHAN_AUTO);
             SetState(ResolveState("See"));
         }
     }
     
     void A_TryFakeDeath()
     {
-        if (!fakeDeathDone && !random(0, 2))
+        if (!CheckShrunk() && !fakeDeathDone && !random(0, 2))
         {
             fakeDeath = true;
             fakeDeathDone = true;
@@ -69,7 +70,7 @@ class AssaultCaptain : AssaultTrooper
     
     override void A_TrooperChase()
     {
-        if (!random(0, 64) && !CheckBehindTarget())
+        if (!CheckShrunk() && !random(0, 64) && !CheckBehindTarget())
         {
             // check if can teleport right behind.
             // this is temporary:
@@ -87,10 +88,11 @@ class AssaultCaptain : AssaultTrooper
         {
             vector3 targetLocation = target.Vec3Angle(target.radius+radius+32, target.Angle+180, target.pos.z);
             double oldz = pos.z;
-            SetXYZ((pos.x, pos.y, target.pos.z));
-            if (!CheckPosition((targetLocation.x, targetLocation.y), false))
+            SetOrigin((targetLocation.x, targetLocation.y, targetLocation.z), false);
+            if (!TestMobjLocation() || !TestMobjZ() ||
+                !!LineAttack(AngleTo(target), Distance3D(target)+8.0, atan2(Distance2D(target), pos.z-target.pos.z)-90, 0, 'None', null))
             {
-                SetXYZ((pos.x, pos.y, oldz));
+                SetOrigin((pos.x, pos.y, oldz), false);
             }
             else
             {
@@ -99,6 +101,12 @@ class AssaultCaptain : AssaultTrooper
                 bNoClip = false;
                 bShootable = true;
                 inTeleport = false;
+                if (pos.z-floorz > MaxStepHeight)
+                {
+                    // start flying if target position was too high in the air.
+                    A_SetFloat();
+                    bNoGravity = true;
+                }
                 SetState(ResolveState("TeleportIn"));
             }
             return;
@@ -146,6 +154,7 @@ class AssaultCaptain : AssaultTrooper
         LIZT U 1 BRIGHT A_SetScale(0.4, 0.7);
         LIZT U 1 BRIGHT A_SetScale(0.6, 0.7);
         LIZT U 1 BRIGHT A_SetScale(0.7, 0.7);
+        TNT1 A 0 A_PlaySound("trooper/see", CHAN_AUTO);
         goto Super::See;
     }
 }

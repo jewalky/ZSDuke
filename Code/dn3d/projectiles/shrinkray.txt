@@ -118,6 +118,7 @@ class ShrinkThinker : Actor
 			st.angle = target.angle;
 			st.pitch = target.pitch;
 			st.roll = target.roll;
+            st.translation = target.translation;
 		}
 	
 		if (basePlayer)

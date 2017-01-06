@@ -119,16 +119,16 @@ class AssaultCaptain : AssaultTrooper
         inTeleport = true;
     }
 
-	Default
-	{
+    Default
+    {
         Health 60;
         
         Obituary "%o got shot by an Assault Captain.";
     
-		//Translation "112:127=[255,255,0]:[32,32,0]"; // yellowish (assault trooper)
+        //Translation "112:127=[255,255,0]:[32,32,0]"; // yellowish (assault trooper)
         Translation "112:127=[255,0,0]:[32,0,0]"; // red (captain)
         //Translation "112:127=[128,192,255]:[8,16,32]"; // normal/original (blueish)
-	}
+    }
     
     States
     {

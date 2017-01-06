@@ -1,16 +1,16 @@
 class TransportFog : Actor
 {
-	Default
-	{
-		+NOINTERACTION;
+    Default
+    {
+        +NOINTERACTION;
         
         RenderStyle "Add";
-	}
+    }
 
-	States
-	{
-	Spawn:
-		CFOG ABCDEF 2 BRIGHT;
+    States
+    {
+    Spawn:
+        CFOG ABCDEF 2 BRIGHT;
         stop;
-	}
+    }
 }

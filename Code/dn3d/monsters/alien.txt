@@ -1,135 +1,135 @@
 class Alien : DukeMonster
 {
-	int oldLeap;
-	
-	override void PostBeginPlay()
-	{
-		Super.PostBeginPlay();
-		
-		oldLeap = false;
-	}
+    int oldLeap;
+    
+    override void PostBeginPlay()
+    {
+        Super.PostBeginPlay();
+        
+        oldLeap = false;
+    }
 
-	void A_Leap()
-	{
-		// if grounded, go to see.
-		if (pos.z == floorz)
-		{
-			if (!oldLeap)
-			{
-				A_FaceTarget();
-				double vertical = 12;
-				if (target.pos.z-pos.z > 64 && ceilingz-pos.z > 128) vertical = 18;
-				vector3 newdir = (cos(angle)*12, sin(angle)*12, vertical);
-				vel += newdir;
-				oldLeap = frame;
-			}
-			else
-			{
-				SetState(ResolveState("See"));
-				return;
-			}
-		}
-		else if (vel.z > 0)
-		{
-			vector3 newdir = (cos(angle)*2, sin(angle)*2, 0);
-			vel += newdir;
-			frame = oldLeap+1;
-		}
-		else if (vel.z < 0)
-		{
-			frame = oldLeap+2;
-		}
-	}
+    void A_Leap()
+    {
+        // if grounded, go to see.
+        if (pos.z == floorz)
+        {
+            if (!oldLeap)
+            {
+                A_FaceTarget();
+                double vertical = 12;
+                if (target.pos.z-pos.z > 64 && ceilingz-pos.z > 128) vertical = 18;
+                vector3 newdir = (cos(angle)*12, sin(angle)*12, vertical);
+                vel += newdir;
+                oldLeap = frame;
+            }
+            else
+            {
+                SetState(ResolveState("See"));
+                return;
+            }
+        }
+        else if (vel.z > 0)
+        {
+            vector3 newdir = (cos(angle)*2, sin(angle)*2, 0);
+            vel += newdir;
+            frame = oldLeap+1;
+        }
+        else if (vel.z < 0)
+        {
+            frame = oldLeap+2;
+        }
+    }
 
-	void A_MyChase()
-	{
-		// check jump
-		// if target is above or below the alien, and it's in some distance away, perform a leap.
-		// but not always.
-		if (!target) return;
-		//
-		if (pos.z == floorz && // if we are standing
-		    (abs(target.pos.z-pos.z) > Default.MaxStepHeight) && // and target has more height difference than maxstepheight
-			!random(0, 16) && // and we don't do this all the time
-			Distance2D(target) < 480) // and target is within max jump radius
-		{
-			oldLeap = 0;
-			SetState(ResolveState("Leap"));
-			return;
-		}
-		
-		
-		// do normal chase.
-		if (!random(0, 4) && !target.FindInventory("Shrunk"))
-			A_Chase("Melee", "Missile");
-		else A_Chase("Melee", null);
-	}
+    void A_MyChase()
+    {
+        // check jump
+        // if target is above or below the alien, and it's in some distance away, perform a leap.
+        // but not always.
+        if (!target) return;
+        //
+        if (pos.z == floorz && // if we are standing
+            (abs(target.pos.z-pos.z) > Default.MaxStepHeight) && // and target has more height difference than maxstepheight
+            !random(0, 16) && // and we don't do this all the time
+            Distance2D(target) < 480) // and target is within max jump radius
+        {
+            oldLeap = 0;
+            SetState(ResolveState("Leap"));
+            return;
+        }
+        
+        
+        // do normal chase.
+        if (!random(0, 4) && !target.FindInventory("Shrunk"))
+            A_Chase("Melee", "Missile");
+        else A_Chase("Melee", null);
+    }
 
-	Default
-	{
-		Monster;
-		Radius 24;
-		Height 64;
-		Health 300;
-		Mass 200;
-		PainChance 64;
-		Speed 8;
-		BloodColor "00 ff 00";
-		
-		Scale 0.65;
-		
-		Obituary "%o got scratched by an unknown beast.";
-		
-		MinMissileChance 255;
-		
-		DamageFactor 'ShrinkRay', 0;
-		
-		SeeSound "alien/see";
-		PainSound "alien/pain";
-		DeathSound "alien/death";
-		ActiveSound "alien/roam";
-	}
+    Default
+    {
+        Monster;
+        Radius 24;
+        Height 64;
+        Health 300;
+        Mass 200;
+        PainChance 64;
+        Speed 8;
+        BloodColor "00 ff 00";
+        
+        Scale 0.65;
+        
+        Obituary "%o got scratched by an unknown beast.";
+        
+        MinMissileChance 255;
+        
+        DamageFactor 'ShrinkRay', 0;
+        
+        SeeSound "alien/see";
+        PainSound "alien/pain";
+        DeathSound "alien/death";
+        ActiveSound "alien/roam";
+    }
 
-	States
-	{
-	Spawn:
-		ALIE A 8 A_Look;
-		loop;
-		
-	See:
-		ALIE BBBBCCCCDDDDEEEE 1 A_MyChase;
-		loop;
-		
-	Melee:
-		ALIE EF 4 A_FaceTarget;
-		ALIE G 8 A_CustomMeleeAttack(random(22, 40), "alien/melee", "alien/miss");
-		ALIE H 2;
-		goto See;
-		
-	Missile:
-		ALIE I 4 { A_FaceTarget(); A_PlaySound("alien/missile", CHAN_AUTO); }
-		ALIE J 8 BRIGHT A_FaceTarget;
-		ALIE J 4 BRIGHT { A_FaceTarget(); A_SpawnProjectile("ShrinkRay"); }
-		ALIE I 2;
-		goto See;
-	
-	Pain:
-		ALIE L 8 A_Pain;
-		goto See;
-		
-	Death:
-		TNT1 A 0 A_Scream;
-		ALIE LMNOPQR 3;
-		ALIE S 3 A_NoBlocking;
-		ALIE T -1 A_SetFloorClip;
-		stop;
-		
-	XDeath:
-		TNT1 A 0 A_ThrowGibs;
-		stop;
-		
-	Leap:
-		ALIE U 1 A_Leap;
-		loop;
-	}
+    States
+    {
+    Spawn:
+        ALIE A 8 A_Look;
+        loop;
+        
+    See:
+        ALIE BBBBCCCCDDDDEEEE 1 A_MyChase;
+        loop;
+        
+    Melee:
+        ALIE EF 4 A_FaceTarget;
+        ALIE G 8 A_CustomMeleeAttack(random(22, 40), "alien/melee", "alien/miss");
+        ALIE H 2;
+        goto See;
+        
+    Missile:
+        ALIE I 4 { A_FaceTarget(); A_PlaySound("alien/missile", CHAN_AUTO); }
+        ALIE J 8 BRIGHT A_FaceTarget;
+        ALIE J 4 BRIGHT { A_FaceTarget(); A_SpawnProjectile("ShrinkRay"); }
+        ALIE I 2;
+        goto See;
+    
+    Pain:
+        ALIE L 8 A_Pain;
+        goto See;
+        
+    Death:
+        TNT1 A 0 A_Scream;
+        ALIE LMNOPQR 3;
+        ALIE S 3 A_NoBlocking;
+        ALIE T -1 A_SetFloorClip;
+        stop;
+        
+    XDeath:
+        TNT1 A 0 A_ThrowGibs;
+        stop;
+        
+    Leap:
+        ALIE U 1 A_Leap;
+        loop;
+    }
 }

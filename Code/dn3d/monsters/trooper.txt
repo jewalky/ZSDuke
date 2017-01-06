@@ -66,73 +66,73 @@ class AssaultTrooper : DukeMonster
         Super.Deactivate(activator);
     }
 
-	Default
-	{
-		Monster;
-		Radius 24;
-		Height 64;
-		Health 30;
-		Mass 100;
-		PainChance 64;
-		Speed 6;
-		
-		Scale 0.7;
-		
-		Obituary "%o got shot by an Assault Trooper.";
-		
-		SeeSound "trooper/see";
-		PainSound "trooper/pain";
-		DeathSound "trooper/death";
-		ActiveSound "trooper/roam";
-		
-		Translation "112:127=[255,255,0]:[32,32,0]"; // yellowish (assault trooper)
+    Default
+    {
+        Monster;
+        Radius 24;
+        Height 64;
+        Health 30;
+        Mass 100;
+        PainChance 64;
+        Speed 6;
+        
+        Scale 0.7;
+        
+        Obituary "%o got shot by an Assault Trooper.";
+        
+        SeeSound "trooper/see";
+        PainSound "trooper/pain";
+        DeathSound "trooper/death";
+        ActiveSound "trooper/roam";
+        
+        Translation "112:127=[255,255,0]:[32,32,0]"; // yellowish (assault trooper)
         //Translation "112:127=[255,0,0]:[32,0,0]"; // red (captain)
         //Translation "112:127=[128,192,255]:[8,16,32]"; // normal/original (blueish)
-	}
+    }
 
-	States
-	{
-	Spawn:
+    States
+    {
+    Spawn:
         TNT1 A 0 A_JumpIf(bNoGravity, "SpawnFly");
-		LIZT AAAABBBB 8 A_Look;
-		loop;
+        LIZT AAAABBBB 8 A_Look;
+        loop;
         
     SpawnFly:
         LIZT G 8 A_Look;
         goto Spawn;
-		
-	See:
+        
+    See:
         TNT1 A 0 A_JumpIf(bNoGravity, "Fly");
-		LIZT AAAABBBBCCCCDDDD 1 A_TrooperChase;
-		loop;
-		
-	Missile:
-		LIZT E 4 { A_FaceTarget(); A_PlaySound("weapon/laser", CHAN_AUTO); }
-		LIZT F 4 BRIGHT { A_FaceTarget(); A_SpawnProjectile("TrooperShot"); }
-		LIZT E 2;
-		goto See;
+        LIZT AAAABBBBCCCCDDDD 1 A_TrooperChase;
+        loop;
+        
+    Missile:
+        LIZT E 4 { A_FaceTarget(); A_PlaySound("weapon/laser", CHAN_AUTO); }
+        LIZT F 4 BRIGHT { A_FaceTarget(); A_SpawnProjectile("TrooperShot"); }
+        LIZT E 2;
+        goto See;
         
     FlyMissile:
-		LIZT G 4 { A_FaceTarget(); A_PlaySound("weapon/laser", CHAN_AUTO); }
-		LIZT H 4 BRIGHT { A_FaceTarget(); A_SpawnProjectile("TrooperShot"); }
-		LIZT G 2;
+        LIZT G 4 { A_FaceTarget(); A_PlaySound("weapon/laser", CHAN_AUTO); }
+        LIZT H 4 BRIGHT { A_FaceTarget(); A_SpawnProjectile("TrooperShot"); }
+        LIZT G 2;
         goto Fly;
-	
-	Pain:
-		LIZT I 8 A_Pain;
-		goto See;
-		
-	Death:
+    
+    Pain:
+        LIZT I 8 A_Pain;
+        goto See;
+        
+    Death:
         TNT1 A 0 A_SetScale(0.7, 0.7); // compatibility for death while teleporting
-		TNT1 A 0 A_Scream;
-		LIZT IJK 7;
-		LIZT L 7 A_NoBlocking;
-		LIZT M -1 A_SetFloorClip;
-		stop;
-		
-	XDeath:
-		TNT1 A 0 A_ThrowGibs("DNTrooperGibs");
-		stop;
+        TNT1 A 0 A_Scream;
+        LIZT IJK 7;
+        LIZT L 7 A_NoBlocking;
+        LIZT M -1 A_SetFloorClip;
+        stop;
+        
+    XDeath:
+        TNT1 A 0 A_ThrowGibs("DNTrooperGibs");
+        stop;
         
     Fly:
         LIZT G 1;

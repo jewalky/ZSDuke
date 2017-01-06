@@ -35,8 +35,8 @@ class TrooperShot : Actor
         //SetDamage(random(8, 20));
     }
 
-	override void Tick()
-	{
+    override void Tick()
+    {
         vector3 unitvel = vel.Unit();
     
         Super.Tick();
@@ -46,32 +46,32 @@ class TrooperShot : Actor
             trail1.A_Warp(AAPTR_MASTER, -unitvel.x*8, -unitvel.y*8, -unitvel.z*8, 0, WARPF_ABSOLUTEOFFSET|WARPF_WARPINTERPOLATION);
             trail2.A_Warp(AAPTR_MASTER, -unitvel.x*16, -unitvel.y*16, -unitvel.z*16, 0, WARPF_ABSOLUTEOFFSET|WARPF_WARPINTERPOLATION);
         }
-	}
-	
-	Default
-	{
+    }
+    
+    Default
+    {
         Projectile;
-		
-		Radius 8;
-		Height 16;
-		Speed 24;
-        Damage 4;
-		
-		Scale 0.75;
         
-		RenderStyle "Add";
-		
-		//SeeSound "octa/missile";
-	}
-	
-	States
-	{
-	Spawn:
-		LASR A 4 BRIGHT;
-		loop;
+        Radius 8;
+        Height 16;
+        Speed 24;
+        Damage 4;
+        
+        Scale 0.75;
+        
+        RenderStyle "Add";
+        
+        //SeeSound "octa/missile";
+    }
+    
+    States
+    {
+    Spawn:
+        LASR A 4 BRIGHT;
+        loop;
         
     Death:
         TNT1 A 0 { trail1.Destroy(); trail2.Destroy(); }
         stop;
-	}
+    }
 }

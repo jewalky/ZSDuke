@@ -112,6 +112,7 @@ class AssaultTrooper : DukeMonster
 		goto See;
 		
 	Death:
+        TNT1 A 0 A_SetScale(0.7, 0.7); // compatibility for death while teleporting
 		TNT1 A 0 A_Scream;
 		LIZT IJK 7;
 		LIZT L 7 A_NoBlocking;

@@ -122,6 +122,8 @@ class AssaultCaptain : AssaultTrooper
 	Default
 	{
         Health 60;
+        
+        Obituary "%o got shot by an Assault Captain.";
     
 		//Translation "112:127=[255,255,0]:[32,32,0]"; // yellowish (assault trooper)
         Translation "112:127=[255,0,0]:[32,0,0]"; // red (captain)

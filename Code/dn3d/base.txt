@@ -73,6 +73,7 @@ class DukeMonster : Actor
     
     override void PostBeginPlay()
     {
+        Super.PostBeginPlay();
         shadowSprite = Spawn("DukeShadowSprite", pos);
         shadowSprite.alpha = 0; // for the first tick only
         shadowSprite.master = self;
@@ -82,9 +83,36 @@ class DukeMonster : Actor
 	{
 		return (!!FindInventory("Shrunk"));
 	}
+    
+    double GetGroundHeight()
+    {
+        double _floorz = GetZAt();
+        bool ok; Actor pOnmobj;
+        [ok, pOnmobj] = TestMobjZ(true);
+        if (!pOnmobj) return _floorz;
+        double _actorz = pOnmobj.pos.z+pOnmobj.height;
+        return max(_floorz, _actorz);
+    }
+    
+    bool CheckOnGround()
+    {
+        return (abs(GetGroundHeight()-pos.z) < 1);
+    }
 	
 	Default
 	{
 		+NOINFIGHTING;
 	}
+}
+
+class CacoWithShadow : Cacodemon replaces Cacodemon
+{
+    States
+    {
+    Spawn:
+        TNT1 A 0 A_Jump(256, "SpawnReal");
+        TNT1 A 0 A_SpawnItemEx("DukeShadowSprite", 0, 0, 0, 0, 0, 0, 0, SXF_SETMASTER);
+    SpawnReal:
+        goto Super::Spawn;
+    }
 }

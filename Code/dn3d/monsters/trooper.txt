@@ -32,7 +32,7 @@ class AssaultTrooper : DukeMonster
         
         if (doStopFlying)
         {
-            if (abs(pos.z-floorz) < MaxStepHeight)
+            if (pos.z-GetGroundHeight() < MaxStepHeight)
             {
                 bNoGravity = false;
                 lastFlyTimer = level.time;

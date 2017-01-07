@@ -12,7 +12,7 @@ class Alien : DukeMonster
     void A_Leap()
     {
         // if grounded, go to see.
-        if (pos.z == floorz)
+        if (CheckOnGround())
         {
             if (!oldLeap)
             {
@@ -79,7 +79,7 @@ class Alien : DukeMonster
         // but not always.
         if (!target) return;
         //
-        if (pos.z == floorz && // if we are standing
+        if (CheckOnGround() && // if we are standing
             !random(0, 16) && // and we don't do this all the time
             ((abs(target.pos.z-pos.z) > Default.MaxStepHeight) || // and target has more height difference than maxstepheight
              CheckPitBeforeTarget()) && // and there's a deep pit in front of us

@@ -100,7 +100,7 @@ class AssaultCaptain : AssaultTrooper
                 bNoClip = false;
                 bShootable = true;
                 inTeleport = false;
-                if (pos.z-floorz > MaxStepHeight)
+                if (pos.z-GetFloorHeight() > MaxStepHeight)
                 {
                     // start flying if target position was too high in the air.
                     A_SetFloat();

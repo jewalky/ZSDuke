@@ -1,3 +1,62 @@
+class DukeShadowSprite : Actor
+{
+    Default
+    {
+        Radius 0;
+        Height 0;
+    
+        +NOINTERACTION;
+        
+        RenderStyle "Stencil";
+        StencilColor "00 00 00";
+    }
+    
+    override void Tick()
+    {
+        if (!master)
+        {
+            // die
+            Destroy();
+            return;
+        }
+        
+        if (!master.bFloorClip)
+        {
+            vector3 offsets = (0,0,0);
+            // note: this is a hack. gross hack. it works, except portals. in portals the shadow will still be random.
+            Actor consoleCamera = (consoleplayer>=0) ? players[consoleplayer].camera : null;
+            if (consoleCamera)
+            {
+                vector3 awayFromCamera = (pos-consoleCamera.pos).Unit()/8;
+                offsets = awayFromCamera;
+            }
+            
+            A_Warp(AAPTR_MASTER, offsets.x, offsets.y, offsets.z, 0, WARPF_ABSOLUTEOFFSET|WARPF_NOCHECKPOSITION|WARPF_TOFLOOR|WARPF_WARPINTERPOLATION|WARPF_COPYVELOCITY);
+            
+            sprite = master.sprite;
+            frame = master.frame;
+            A_SetScale(master.scale.x, master.scale.y/16);
+            alpha = master.alpha/2;
+            angle = master.angle;
+            A_SetSize(master.radius, 0, false);
+        }
+        else
+        {
+            alpha = 0;
+        }
+            
+        Super.Tick();
+        
+    }
+    
+    States
+    {
+    Spawn:
+        TNT1 A 1;
+        loop;
+    }
+}
+
 class DukeMonster : Actor
 {
 	void A_ThrowGibs(class<DNGibs> cls = "DNGibs", bool down = false)
@@ -9,7 +68,16 @@ class DukeMonster : Actor
 			gibs.vel = (frandom(-16,16), frandom(-16,16), frandom(0,down?-1:16));
 		}
 	}
-	
+    
+    Actor shadowSprite;
+    
+    override void PostBeginPlay()
+    {
+        shadowSprite = Spawn("DukeShadowSprite", pos);
+        shadowSprite.alpha = 0; // for the first tick only
+        shadowSprite.master = self;
+    }
+    
 	bool CheckShrunk()
 	{
 		return (!!FindInventory("Shrunk"));

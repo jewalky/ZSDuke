@@ -347,6 +347,7 @@ class Slimer : DukeMonster
 		
 		+NOBLOCKMAP;
 		+LOOKALLAROUND;
+        +FLOORCLIP;
 		
 		Scale 0.7;
 		

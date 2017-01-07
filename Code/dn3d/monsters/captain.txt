@@ -89,8 +89,7 @@ class AssaultCaptain : AssaultTrooper
             vector3 targetLocation = target.Vec3Angle(target.radius+radius+32, target.Angle+180, target.pos.z);
             double oldz = pos.z;
             SetOrigin((targetLocation.x, targetLocation.y, targetLocation.z), false);
-            if (!TestMobjLocation() || !TestMobjZ() ||
-                !!LineAttack(AngleTo(target), Distance3D(target)+8.0, atan2(Distance2D(target), pos.z-target.pos.z)-90, 0, 'None', null))
+            if (!TestMobjLocation() || !TestMobjZ() || !CheckDirectLOF(target))
             {
                 SetOrigin((pos.x, pos.y, oldz), false);
             }

@@ -69,12 +69,11 @@ class DukeMonster : Actor
 		}
 	}
     
-    Actor shadowSprite;
-    
     override void PostBeginPlay()
     {
         Super.PostBeginPlay();
-        shadowSprite = Spawn("DukeShadowSprite", pos);
+        
+        Actor shadowSprite = Spawn("DukeShadowSprite", pos);
         shadowSprite.alpha = 0; // for the first tick only
         shadowSprite.master = self;
     }
@@ -99,6 +98,15 @@ class DukeMonster : Actor
         return (abs(GetGroundHeight()-pos.z) < 1);
     }
 	
+    bool CheckDirectLOF(Actor mo)
+    {
+        Actor oldtracer = tracer;
+        tracer = mo;
+        bool hasLOF = !!A_CheckLOF("Spawn", 0, Distance3D(mo)+8, 0, 0, 0, 0, 0, AAPTR_TRACER);
+        tracer = oldtracer;
+        return hasLOF;
+    }
+    
 	Default
 	{
 		+NOINFIGHTING;

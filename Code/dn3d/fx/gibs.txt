@@ -1,11 +1,14 @@
 class DNGibs : Actor
 {
-    int deathTimer;
+    override void PostBeginPlay()
+    {
+        reactiontime = 40;
+    }
     
     override void Tick()
     {
         Super.Tick();
-        if (deathTimer++ > 20 || ceilingz==pos.z || floorz==pos.z)
+        if (reactiontime <= 0 || ceilingz==pos.z || floorz==pos.z)
             Destroy();
     }
 

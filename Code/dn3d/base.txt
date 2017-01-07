@@ -61,11 +61,11 @@ class DukeMonster : Actor
 {
 	void A_ThrowGibs(class<DNGibs> cls = "DNGibs", bool down = false)
 	{
-		for (int i = 0; i < 8; i++)
+		for (int i = 0; i < 16; i++)
 		{
 			//
 			Actor gibs = Spawn(cls, pos);
-			gibs.vel = (frandom(-16,16), frandom(-16,16), frandom(0,down?-1:16));
+			gibs.vel = (frandom(-8,8), frandom(-8,8), frandom(0,down?-1:16));
 		}
 	}
     

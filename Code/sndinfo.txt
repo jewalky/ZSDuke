@@ -28,8 +28,15 @@ trooper/death PREDDY
 
 captain/choke CHOKN12
 
+lizman/roam PREDRM
+lizman/see PREDRG
+lizman/pain PREDPN
+lizman/death PREDDY
+lizman/spit LIZSPIT
+
 weapon/laser GBLASR01
 weapon/shrinker SHRINKER
+weapon/chaingun CHAINGUN
 
 sfx/shrinker SHRINK
 sfx/expander ENLARGE

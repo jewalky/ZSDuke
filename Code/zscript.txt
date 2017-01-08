@@ -4,6 +4,7 @@
 #include "dn3d/fx/gibs_slimer.txt"
 #include "dn3d/fx/gibs_trooper.txt"
 #include "dn3d/fx/transporter.txt"
+#include "dn3d/fx/bloodpool.txt"
 
 #include "dn3d/projectiles/octabrainball.txt"
 #include "dn3d/projectiles/shrinkray.txt"

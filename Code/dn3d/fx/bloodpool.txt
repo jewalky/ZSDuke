@@ -1,0 +1,38 @@
+const BLOODPOOL_SPAWNTIME = 25;
+
+class DNBloodPool : Actor
+{
+    override void PostBeginPlay()
+    {
+        Super.PostBeginPlay();
+        reactiontime = 0;
+    }
+
+    void A_PoolSpawn()
+    {
+        if (++reactiontime > BLOODPOOL_SPAWNTIME) return;
+        A_SetScale(double(reactiontime)/BLOODPOOL_SPAWNTIME*1.5);
+    }
+
+    Default
+    {
+        +FLATSPRITE;
+        Translation "0:255=%[0,0,0]:[1,0,0]";
+        Scale 0;
+    }
+    
+    States
+    {
+    Spawn:
+        BPOL A 1 A_PoolSpawn;
+        loop;
+    }
+}
+
+class DNBloodPoolGreen : DNBloodPool
+{
+    Default
+    {
+        Translation "0:255=%[0,0,0]:[0,1,0]";
+    }
+}

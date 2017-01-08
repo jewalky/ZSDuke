@@ -114,18 +114,6 @@ class DukeMonster : Actor
     }
 }
 
-class CacoWithShadow : Cacodemon replaces Cacodemon
-{
-    States
-    {
-    Spawn:
-        TNT1 A 0 A_Jump(256, "SpawnReal");
-        TNT1 A 0 A_SpawnItemEx("DukeShadowSprite", 0, 0, 0, 0, 0, 0, 0, SXF_SETMASTER);
-    SpawnReal:
-        goto Super::Spawn;
-    }
-}
-
 class JumpyMonster : DukeMonster
 {
     enum EJumpFlags

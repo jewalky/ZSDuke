@@ -211,6 +211,7 @@ class JumpyMonster : DukeMonster
     bool TryLeap(state leapstate, EJumpFlags flags)
     {
         if (!target) return false;
+        if (CheckShrunk()) return false; // alien didn't need this
         //
         if (CheckOnGround() && // if we are standing
             !random(0, 16) && // and we don't do this all the time

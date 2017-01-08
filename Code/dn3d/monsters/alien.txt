@@ -1,95 +1,11 @@
-class Alien : DukeMonster
+class Alien : JumpyMonster
 {
-    int oldLeap;
-    
-    override void PostBeginPlay()
-    {
-        Super.PostBeginPlay();
-        
-        oldLeap = false;
-    }
-
-    void A_Leap()
-    {
-        // if grounded, go to see.
-        if (CheckOnGround())
-        {
-            if (!oldLeap)
-            {
-                A_FaceTarget();
-                double vertical = 12;
-                if (target.pos.z-pos.z > 64 && ceilingz-pos.z > 128) vertical = 18;
-                vector3 newdir = (cos(angle)*12, sin(angle)*12, vertical);
-                vel += newdir;
-                oldLeap = frame;
-            }
-            else
-            {
-                SetState(ResolveState("See"));
-                return;
-            }
-        }
-        else if (vel.z > 0)
-        {
-            vector3 newdir = (cos(angle)*2, sin(angle)*2, 0);
-            vel += newdir;
-            frame = oldLeap+1;
-        }
-        else if (vel.z < 0)
-        {
-            frame = oldLeap+2;
-        }
-    }
-    
-    double GetJumpDistance()
-    {
-        double dst = 480;
-        if (ceilingz-pos.z > 128) dst *= 2;
-        return dst;
-    }
-
-    bool CheckPitBeforeTarget()
-    {
-        if (!CheckSight(target)) return false;
-        
-        int step = int(radius/2);
-        vector3 checkdirection = (target.pos-pos).Unit()*step;
-        int steps = min(Distance2D(target), GetJumpDistance())/step;
-        double curz = pos.z;
-        SetXYZ((pos.x, pos.y, pos.z+64));
-        for (int i = 0; i < steps; i++)
-        {
-            double zat = GetZAt(pos.x+checkdirection.x*i, pos.y+checkdirection.y*i, 0, GZF_ABSOLUTEPOS|GZF_ABSOLUTEANG);
-            //A_LogFloat(zat);
-            if (curz-zat > MaxStepHeight*2 || zat-curz > MaxStepHeight)
-            {
-                SetXYZ((pos.x, pos.y, curz));
-                return true;
-            }
-        }
-        
-        SetXYZ((pos.x, pos.y, curz));
-        return false;
-    }
-    
     void A_MyChase()
     {
-        // check jump
-        // if target is above or below the alien, and it's in some distance away, perform a leap.
-        // but not always.
         if (!target) return;
         //
-        if (CheckOnGround() && // if we are standing
-            !random(0, 16) && // and we don't do this all the time
-            ((abs(target.pos.z-pos.z) > Default.MaxStepHeight) || // and target has more height difference than maxstepheight
-             CheckPitBeforeTarget()) && // and there's a deep pit in front of us
-            Distance2D(target) < GetJumpDistance()) // and target is within max jump radius
-        {
-            oldLeap = 0;
-            SetState(ResolveState("Leap"));
+        if (TryLeap(ResolveState("Leap"), JF_ALL))
             return;
-        }
-        
         
         // do normal chase.
         if (!random(0, 4) && !target.FindInventory("Shrunk"))

@@ -137,6 +137,7 @@ class JumpyMonster : DukeMonster
     }
 
     int oldLeap;
+    double leapDistance;
     
     override void PostBeginPlay()
     {
@@ -155,7 +156,10 @@ class JumpyMonster : DukeMonster
                 A_FaceTarget();
                 double vertical = 12;
                 if (target.pos.z-pos.z > 64 && ceilingz-pos.z > 128) vertical = 18;
-                vector3 newdir = (cos(angle)*12, sin(angle)*12, vertical);
+                double horizontalMult = leapDistance / 480;
+                double horizontal = 1;
+                for (int i = 0; i < 4; i++) horizontal *= horizontalMult; // pow is not defined
+                vector3 newdir = (cos(angle)*horizontal, sin(angle)*horizontal, vertical);
                 vel += newdir;
                 oldLeap = frame;
             }
@@ -220,6 +224,7 @@ class JumpyMonster : DukeMonster
             Distance2D(target) < GetJumpDistance()) // and target is within max jump radius
         {
             oldLeap = 0;
+            leapDistance = Distance2D(target);
             SetState(ResolveState("Leap"));
             return true;
         }

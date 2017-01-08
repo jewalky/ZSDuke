@@ -10,6 +10,8 @@ class DNGibs : Actor
     Default
     {
         +NOCLIP;
+        
+        Scale 0.7;
     }
 
     States

@@ -51,6 +51,7 @@ class SlimerDamageHelper : Actor
 		Radius 32;
 		Height 64;
 		Health 1;
+        BloodColor "ff ff 4f";
 		
 		+SOLID;
 		+SHOOTABLE;
@@ -334,6 +335,7 @@ class Slimer : DukeMonster
 		if (hitbox) hitbox.Destroy();
 		
 		// spawn random gibs
+        A_SpawnItemEx("DNBloodPoolAcid", 0, 0, 0, 0, 0, 0, 0, 0, 128); // 128 is the failchance
 		A_ThrowGibs("DNGreenGibs", wasReversed);
 	}
 

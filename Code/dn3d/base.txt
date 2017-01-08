@@ -59,15 +59,16 @@ class DukeShadowSprite : Actor
 
 class DukeMonster : Actor
 {
-	void A_ThrowGibs(class<DNGibs> cls = "DNGibs", bool down = false)
-	{
-		for (int i = 0; i < 16; i++)
-		{
-			//
-			Actor gibs = Spawn(cls, pos);
-			gibs.vel = (frandom(-8,8), frandom(-8,8), frandom(0,down?-1:16));
-		}
-	}
+    void A_ThrowGibs(class<Actor> cls = "DNGibs", bool down = false)
+    {
+        int gibscount = random(8, 16);
+        for (int i = 0; i < gibscount; i++)
+        {
+            //
+            Actor gibs = Spawn(cls, pos);
+            gibs.vel = (frandom(-8,8), frandom(-8,8), frandom(0,down?-1:16));
+        }
+    }
     
     override void PostBeginPlay()
     {
@@ -78,10 +79,10 @@ class DukeMonster : Actor
         shadowSprite.master = self;
     }
     
-	bool CheckShrunk()
-	{
-		return (!!FindInventory("Shrunk"));
-	}
+    bool CheckShrunk()
+    {
+        return (!!FindInventory("Shrunk"));
+    }
     
     double GetGroundHeight()
     {
@@ -97,7 +98,7 @@ class DukeMonster : Actor
     {
         return (abs(GetGroundHeight()-pos.z) < 1);
     }
-	
+    
     bool CheckDirectLOF(Actor mo)
     {
         Actor oldtracer = tracer;
@@ -107,10 +108,10 @@ class DukeMonster : Actor
         return hasLOF;
     }
     
-	Default
-	{
-		+NOINFIGHTING;
-	}
+    Default
+    {
+        +NOINFIGHTING;
+    }
 }
 
 class CacoWithShadow : Cacodemon replaces Cacodemon

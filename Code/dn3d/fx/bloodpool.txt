@@ -2,16 +2,24 @@ const BLOODPOOL_SPAWNTIME = 25;
 
 class DNBloodPool : Actor
 {
+    double flipX;
+    double flipY;
+
     override void PostBeginPlay()
     {
         Super.PostBeginPlay();
         reactiontime = 0;
+        // set random angle
+        angle = frandom(0, 360);
+        flipX = random(0,1)?-1:1;
+        flipY = random(0,1)?-1:1;
     }
 
-    void A_PoolSpawn()
+    virtual void A_TickPool()
     {
         if (++reactiontime > BLOODPOOL_SPAWNTIME) return;
-        A_SetScale(double(reactiontime)/BLOODPOOL_SPAWNTIME*1.5);
+        double _scale = double(reactiontime)/BLOODPOOL_SPAWNTIME;
+        A_SetScale(_scale*flipX, _scale*flipY);
     }
 
     Default
@@ -24,15 +32,43 @@ class DNBloodPool : Actor
     States
     {
     Spawn:
-        BPOL A 1 A_PoolSpawn;
+        BPOL A 1 A_TickPool;
         loop;
     }
 }
 
 class DNBloodPoolGreen : DNBloodPool
 {
+    override void A_TickPool()
+    {
+        Super.A_TickPool();
+        if (level.time%20 == 0)
+        {
+            double poisonradius = scale.x*32;
+            BlockThingsIterator it = BlockThingsIterator.Create(self, poisonradius);
+            while (it.Next())
+            {
+                Actor mo = it.thing;
+                // check if actor is too far away
+                if ((mo.pos.z-pos.z > 4) || (pos.z-(mo.pos.z+mo.height) > 4) ||
+                    Distance2D(mo) > poisonradius) continue;
+                // apply poison (rather, slime) damage
+                mo.DamageMobj(self, self, random(8, 16), 'Slime', DMG_THRUSTLESS);
+            }
+        }
+    }
+
     Default
     {
         Translation "0:255=%[0,0,0]:[0,1,0]";
+    }
+}
+
+// this is the classic duke nukem acid pool.
+class DNBloodPoolAcid : DNBloodPoolGreen
+{
+    Default
+    {
+        Translation "0:255=%[0,0,0]:[1.0,1.0,0.4]";
     }
 }

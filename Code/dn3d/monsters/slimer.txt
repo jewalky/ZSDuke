@@ -346,6 +346,9 @@ class Slimer : DukeMonster
 		Height 0;
 		Health 1;
 		Speed 2;
+        
+        DamageFactor 'ShrinkRay', 0;
+        DamageFactor 'Slime', 0;
 		
 		+NOBLOCKMAP;
 		+LOOKALLAROUND;

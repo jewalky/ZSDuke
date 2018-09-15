@@ -10,7 +10,7 @@ class Enforcer : JumpyMonster
         if (CheckShrunk()) A_Chase(null, null);
         else A_Chase(null, "Missile");
     }
-
+    
     Default
     {
         Monster;

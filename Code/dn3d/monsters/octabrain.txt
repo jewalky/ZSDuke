@@ -19,7 +19,7 @@ class Octabrain : DukeMonster
 		PainChance 64;
 		Speed 4;
 		
-		DamageFactor 'OctaAt', 0.25;
+		DamageFactor "OctaAt", 0.25;
 		
 		+NOGRAVITY;
 		+FLOAT;

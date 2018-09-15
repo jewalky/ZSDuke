@@ -3,15 +3,15 @@ class SlimerAttackHelper : CustomInventory
 {
 	int startBiting;
 
-	void A_StartBite()
+	action void A_StartBite()
 	{
-		startBiting = 0;
+		invoker.startBiting = 0;
 	}
 
-	void A_SlimerPlayerBite()
+	action void A_SlimerPlayerBite()
 	{
-		if (startBiting < 64) startBiting+=2;
-		A_OverlayOffset(0xF00, 0, 96-startBiting, 0);
+		if (invoker.startBiting < 64) invoker.startBiting+=2;
+		A_OverlayOffset(0xF00, 0, 96-invoker.startBiting, 0);
 	}
 
 	States
@@ -40,7 +40,7 @@ class SlimerDamageHelper : Actor
 		A_Warp(AAPTR_MASTER, 0, 0, 0, 0, WARPF_NOCHECKPOSITION|WARPF_COPYINTERPOLATION);
 	}
 	
-	bool CanCollideWith(Actor other, bool passive)
+	override bool CanCollideWith(Actor other, bool passive)
 	{
 		if (other.bMissile) return true;
 		return false;
@@ -347,8 +347,8 @@ class Slimer : DukeMonster
 		Health 1;
 		Speed 2;
         
-        DamageFactor 'ShrinkRay', 0;
-        DamageFactor 'Slime', 0;
+        DamageFactor "ShrinkRay", 0;
+        DamageFactor "Slime", 0;
 		
 		+NOBLOCKMAP;
 		+LOOKALLAROUND;

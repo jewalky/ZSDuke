@@ -1,0 +1,6 @@
+pointlight LTestAt
+{
+	color 1.0 1.0 1.0
+	size 128
+	attenuate 1
+}

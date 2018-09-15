@@ -1,0 +1,17 @@
+DoomEdNums
+{
+	19000 = Enforcer
+    19001 = Octabrain
+    19002 = AssaultTrooper
+    19003 = AssaultCaptain
+    19004 = Alien
+    19005 = Slimer
+    19006 = DNBloodPool
+    19007 = DNBloodPoolGreen
+    19008 = DNBloodPoolAcid
+}
+
+GameInfo
+{
+    PlayerClasses = "MyPawn"
+}

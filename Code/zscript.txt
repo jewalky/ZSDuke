@@ -17,3 +17,28 @@
 #include "dn3d/monsters/trooper.txt"
 #include "dn3d/monsters/captain.txt"
 #include "dn3d/monsters/lizman.txt"
+
+class MyPawn : DoomPlayer
+{
+    override void PostBeginPlay()
+    {
+        Super.PostBeginPlay();
+        A_Overlay(666, "TestState");
+    }
+
+    void t()
+    {
+    }
+    
+    override void Tick()
+    {
+        Super.Tick();
+    }
+    
+    States
+    {
+    TestState:
+        M021 T 1;
+        loop;
+    }
+}

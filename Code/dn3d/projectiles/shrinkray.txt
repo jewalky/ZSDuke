@@ -248,8 +248,14 @@ class ShrinkThinker : Actor
 
 class ShrinkRay : Actor
 {
+	vector3 oldvel;
+
     void A_MyMissile()
     {
+		if (vel.xy.Length() != 0)
+			oldvel = vel;
+		return;
+	
         // check 'intersection' with shootable actors
         BlockThingsIterator bit = BlockThingsIterator.Create(self);
         while (bit.Next())
@@ -285,6 +291,46 @@ class ShrinkRay : Actor
             return;
         }
     }
+	
+	void A_TestMirror()
+	{
+		Console.Printf("test mirror, line = %p; object = %p", BlockingLine, BlockingMobj);
+		if (oldvel.xy.Length() == 0)
+			return;
+	
+		// if we collided against a mirror line and that's the cause for death: just continue to fly
+		if (BlockingLine && BlockingLine.special == 182)
+		{
+			// bounce
+			// walls are normally perfectly vertical
+			// so mirror only X and Y, leave Z
+			double wdx = BlockingLine.v2.p.x - BlockingLine.v1.p.x;
+			double wdy = BlockingLine.v2.p.y - BlockingLine.v1.p.y;
+			
+			double vx = oldvel.x;
+			double vy = oldvel.y;
+			
+			vector2 v = (vx, vy);
+			vector2 n = (wdy, wdx);
+			
+			vector2 u = ((v dot n) / (n dot n)) * n;
+			vector2 w = v - u;
+			
+			vector2 xyvel = w - u;
+			vel = (xyvel.x, xyvel.y, oldvel.z);
+			Console.Printf("new vel = %f,%f,%f; old vel = %f,%f,%f", vel.x, vel.y, vel.z, oldvel.x, oldvel.y, oldvel.z);
+			
+			target = master = tracer = null;
+			threshold = 0;
+			bKilled = false;
+			bMissile = true;
+			
+			SetOrigin(pos-oldvel, true);
+			SetState(ResolveState("Spawn"));
+			
+			Console.Printf("nointeraction = %d; noclip = %d", bNointeraction, bNoclip);
+		}
+	}
     
     override bool CanCollideWith(Actor other, bool passive)
     {
@@ -312,6 +358,8 @@ class ShrinkRay : Actor
         SHRY AABBCCDD 1 BRIGHT A_MyMissile;
         loop;
     Death:
+		// 
+		SHRY A 0 A_TestMirror;
         SHRY EFGH 4 BRIGHT;
         stop;
     }

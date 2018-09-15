@@ -30,7 +30,7 @@ class Alien : JumpyMonster
         
         MinMissileChance 255;
         
-        DamageFactor 'ShrinkRay', 0;
+        DamageFactor "ShrinkRay", 0;
         
         SeeSound "alien/see";
         PainSound "alien/pain";

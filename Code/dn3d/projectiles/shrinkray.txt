@@ -254,8 +254,9 @@ class ShrinkRay : Actor
     {
 		if (vel.xy.Length() != 0)
 			oldvel = vel;
-		return;
-	
+			
+		bMissile = true; // hack
+
         // check 'intersection' with shootable actors
         BlockThingsIterator bit = BlockThingsIterator.Create(self);
         while (bit.Next())
@@ -294,7 +295,7 @@ class ShrinkRay : Actor
 	
 	void A_TestMirror()
 	{
-		Console.Printf("test mirror, line = %p; object = %p", BlockingLine, BlockingMobj);
+		//Console.Printf("test mirror, line = %p; object = %p", BlockingLine, BlockingMobj);
 		if (oldvel.xy.Length() == 0)
 			return;
 	
@@ -318,17 +319,17 @@ class ShrinkRay : Actor
 			
 			vector2 xyvel = w - u;
 			vel = (xyvel.x, xyvel.y, oldvel.z);
-			Console.Printf("new vel = %f,%f,%f; old vel = %f,%f,%f", vel.x, vel.y, vel.z, oldvel.x, oldvel.y, oldvel.z);
+			//Console.Printf("new vel = %f,%f,%f; old vel = %f,%f,%f", vel.x, vel.y, vel.z, oldvel.x, oldvel.y, oldvel.z);
 			
 			target = master = tracer = null;
 			threshold = 0;
-			bKilled = false;
-			bMissile = true;
+			//bKilled = false;
+			//bMissile = true;
 			
 			SetOrigin(pos-oldvel, true);
 			SetState(ResolveState("Spawn"));
 			
-			Console.Printf("nointeraction = %d; noclip = %d", bNointeraction, bNoclip);
+			//Console.Printf("nointeraction = %d; noclip = %d; missile = %d; killed = %d; corpse = %d", bNointeraction, bNoclip, bMissile, bKilled, bCorpse);
 		}
 	}
     
